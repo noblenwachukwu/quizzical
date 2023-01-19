@@ -9,9 +9,10 @@ import Questions from './components/Questions';
 
 
 
+
 const App: React.FC  = () => {
   const [startGame, setStartGame] = React.useState<boolean>(false)
-  const [questions, setQuestions] = React.useState<[]>([])
+  const [questions, setQuestions] = React.useState<any[]>([])
   const [count,setCount] = React.useState<number>(0)
 console.log(questions)
 
@@ -22,6 +23,8 @@ React.useEffect(()=>{
    const data = await res.json()
    const prepareData = data.results.map((question:any) => {
     return {
+      checked:false,
+      selected:null,
       id: nanoid(),
       question: atob(question.question),
       correct_answer: atob(question.correct_answer),
@@ -43,13 +46,20 @@ function handleStart():void{
   setStartGame(true)
 }
 
+function handleClickedAnswer(id: any, answer:string){
+ setQuestions(prevQuestion=> prevQuestion.map(question=>{
+  return question.id === id ? {...question, selected: answer}: question
+ }))
+}
+
 const questionElement = questions.map(question=>{
   return(
     <Questions 
-    id={question.id}
-    key={question.id}
-    question={question}
-    />
+      id={question.id}
+      key={question.id}
+      question={question}  
+      handleClickedAnswer={handleClickedAnswer}
+           />
   )
 })
 
@@ -57,7 +67,7 @@ const questionElement = questions.map(question=>{
     <div>
       { !startGame ? <StartGame handleStart={handleStart}/>
         :
-        <div> <Questions questions={questions}/> </div>}
+        <div> {questionElement} </div>}
      
     </div>
   )
